@@ -214,6 +214,56 @@ function isAlreadySetup() {
   }
 }
 
+// ─── Configure MCP Server ──────────────────────────────────────────────────
+
+const MCP_SERVER_MARKER = 'agent-flow-monitor'
+const MCP_SERVER_PATH = path.join(DISCOVERY_DIR, 'mcp-server.js')
+
+function ensureMcpServer() {
+  // Build and install MCP server bundle
+  const buildScript = path.join(__dirname, 'build-mcp.js')
+  const builtFile = path.join(__dirname, '.mcp-server.js')
+
+  if (fs.existsSync(buildScript)) {
+    try {
+      execFileSync(resolveNodePath(), [buildScript], { encoding: 'utf8', timeout: 30000 })
+    } catch (e) {
+      console.log('Warning: Could not build MCP server:', e.message)
+    }
+  }
+
+  if (fs.existsSync(builtFile)) {
+    fs.copyFileSync(builtFile, MCP_SERVER_PATH)
+    console.log('Installed MCP server:', MCP_SERVER_PATH)
+  }
+}
+
+function configureMcpServer() {
+  const nodePath = resolveNodePath()
+
+  let settings = {}
+  try {
+    if (fs.existsSync(SETTINGS_PATH)) {
+      settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'))
+    }
+  } catch {}
+
+  if (!settings.mcpServers) {
+    settings.mcpServers = {}
+  }
+
+  settings.mcpServers[MCP_SERVER_MARKER] = {
+    command: nodePath,
+    args: [MCP_SERVER_PATH],
+    env: {
+      AGENT_FLOW_RELAY_PORT: '3001',
+    },
+  }
+
+  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2) + '\n')
+  console.log('Configured MCP server in:', SETTINGS_PATH)
+}
+
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 /** Ensure hooks are configured, skip silently if already set up. */
@@ -239,5 +289,7 @@ if (require.main === module) {
   console.log('Setting up Agent Flow...\n')
   ensureHookScript()
   configureHooks()
+  ensureMcpServer()
+  configureMcpServer()
   console.log('\nDone! New sessions will stream events to Agent Flow.')
 }

@@ -25,6 +25,7 @@ import { MessageFeedPanel } from "./message-feed-panel"
 import { TopBar } from "./top-bar"
 import { useAudioEffects } from "@/hooks/use-audio-effects"
 import { SettingsPanel } from "./settings-panel"
+import { CommandPanel, type McpCommand, type McpNotification } from "./command-panel"
 
 export function AgentVisualizer() {
   const bridge = useVSCodeBridge()
@@ -70,6 +71,22 @@ export function AgentVisualizer() {
   const [showFileAttention, setShowFileAttention] = useState(false)
   const [showTranscript, setShowTranscript] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showCommandPanel, setShowCommandPanel] = useState(false)
+  const [mcpCommands, setMcpCommands] = useState<McpCommand[]>([])
+  const [mcpNotifications, setMcpNotifications] = useState<McpNotification[]>([])
+  const [mcpConnected, setMcpConnected] = useState(false)
+
+  // MCP 연결 상태 주기적 확인
+  useEffect(() => {
+    const checkMcp = () => {
+      fetch('http://127.0.0.1:3001/mcp/commands?session=ping')
+        .then(r => { setMcpConnected(r.ok) })
+        .catch(() => { setMcpConnected(false) })
+    }
+    checkMcp()
+    const interval = setInterval(checkMcp, 5000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Mutually exclusive panel toggling — opening one closes the others
   const toggleExclusivePanel = useCallback((panel: 'files' | 'transcript' | 'cost') => {
@@ -412,6 +429,8 @@ export function AgentVisualizer() {
         onToggleMute={handleToggleMute}
         showSettings={showSettings}
         onToggleSettings={() => setShowSettings(prev => !prev)}
+        showCommandPanel={showCommandPanel}
+        onToggleCommandPanel={() => setShowCommandPanel(prev => !prev)}
       />
 
       {/* Settings panel */}
@@ -432,6 +451,16 @@ export function AgentVisualizer() {
         onToggleCostOverlay={() => toggleExclusivePanel('cost')}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
+      />
+
+      {/* Command panel (MCP) */}
+      <CommandPanel
+        visible={showCommandPanel}
+        onClose={() => setShowCommandPanel(false)}
+        selectedSessionId={bridge.selectedSessionId}
+        commands={mcpCommands}
+        notifications={mcpNotifications}
+        mcpConnected={mcpConnected}
       />
     </div>
     </OpenFileProvider>

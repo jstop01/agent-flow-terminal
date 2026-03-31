@@ -16,5 +16,9 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "esbuild": "^0.20.2"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.3.6"
   }
 }

@@ -101,6 +101,8 @@ export interface TopBarProps {
   onToggleMute: () => void
   showSettings?: boolean
   onToggleSettings?: () => void
+  showCommandPanel?: boolean
+  onToggleCommandPanel?: () => void
 }
 
 export const TopBar = memo(function TopBar({
@@ -111,6 +113,7 @@ export const TopBar = memo(function TopBar({
   showFileAttention, showTranscript, showCostOverlay, showTimeline, isMuted,
   onTogglePanel, onToggleTimeline, onToggleMute,
   showSettings, onToggleSettings,
+  showCommandPanel, onToggleCommandPanel,
 }: TopBarProps) {
   return (
     <div className="absolute top-3 left-3 right-3 flex items-center gap-4 font-mono text-[12px]" style={{ zIndex: Z.info }}>
@@ -164,6 +167,11 @@ export const TopBar = memo(function TopBar({
         <ToggleButton active={!isMuted} onClick={onToggleMute} style={{ border: `1px solid ${COLORS.toggleBorder}` }}>
           {isMuted ? <MutedIcon /> : <UnmutedIcon />}
         </ToggleButton>
+        {onToggleCommandPanel && (
+          <ToggleButton active={!!showCommandPanel} onClick={onToggleCommandPanel} style={{ border: `1px solid ${COLORS.toggleBorder}` }}>
+            📡
+          </ToggleButton>
+        )}
         {onToggleSettings && (
           <ToggleButton active={!!showSettings} onClick={onToggleSettings} style={{ border: `1px solid ${COLORS.toggleBorder}` }}>
             ⚙

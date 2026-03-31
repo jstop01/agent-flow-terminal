@@ -326,6 +326,141 @@ function removeDiscoveryFile() {
   }
 }
 
+// ─── MCP command queue ───────────────────────────────────────────────────────
+
+interface McpCommand {
+  id: string
+  type: 'prompt' | 'pause' | 'resume' | 'cancel' | 'set_context'
+  payload: Record<string, unknown>
+  timestamp: number
+  status: 'pending' | 'acknowledged'
+}
+
+const commandQueues = new Map<string, McpCommand[]>()
+const uiStateCache = new Map<string, unknown>()
+
+function broadcastMcpEvent(eventType: string, data: unknown) {
+  broadcast(JSON.stringify({ type: eventType, ...( data !== null && typeof data === 'object' ? data : { data } ) }))
+}
+
+export function handleMcpRequest(req: http.IncomingMessage, res: http.ServerResponse, body?: unknown) {
+  const url = new URL(req.url!, `http://localhost`)
+  const pathname = url.pathname
+
+  res.setHeader('Content-Type', 'application/json')
+
+  // GET /mcp/commands?session=<id>
+  if (req.method === 'GET' && pathname === '/mcp/commands') {
+    const sessionId = url.searchParams.get('session')
+    if (!sessionId) {
+      res.writeHead(400)
+      res.end(JSON.stringify({ error: 'Missing session parameter' }))
+      return
+    }
+    const queue = commandQueues.get(sessionId) || []
+    const pending = queue.filter(c => c.status === 'pending')
+    // Drain: mark all returned commands as acknowledged
+    for (const cmd of pending) cmd.status = 'acknowledged'
+    res.writeHead(200)
+    res.end(JSON.stringify({ commands: pending }))
+    return
+  }
+
+  // POST /mcp/commands
+  if (req.method === 'POST' && pathname === '/mcp/commands') {
+    const { sessionId, type, payload } = (body as Record<string, unknown> || {})
+    if (!sessionId || !type) {
+      res.writeHead(400)
+      res.end(JSON.stringify({ error: 'Missing sessionId or type' }))
+      return
+    }
+    const command: McpCommand = {
+      id: crypto.randomUUID(),
+      type: type as McpCommand['type'],
+      payload: (payload as Record<string, unknown>) || {},
+      timestamp: Date.now(),
+      status: 'pending',
+    }
+    const queue = commandQueues.get(sessionId as string) || []
+    queue.push(command)
+    commandQueues.set(sessionId as string, queue)
+    broadcastMcpEvent('mcp-command-enqueued', { sessionId, command })
+    res.writeHead(201)
+    res.end(JSON.stringify({ id: command.id }))
+    return
+  }
+
+  // POST /mcp/status
+  if (req.method === 'POST' && pathname === '/mcp/status') {
+    broadcastMcpEvent('mcp-status', body)
+    res.writeHead(200)
+    res.end(JSON.stringify({ ok: true }))
+    return
+  }
+
+  // POST /mcp/notification
+  if (req.method === 'POST' && pathname === '/mcp/notification') {
+    broadcastMcpEvent('mcp-notification', body)
+    res.writeHead(200)
+    res.end(JSON.stringify({ ok: true }))
+    return
+  }
+
+  // GET /mcp/ui-state?session=<id>
+  if (req.method === 'GET' && pathname === '/mcp/ui-state') {
+    const sessionId = url.searchParams.get('session')
+    if (!sessionId) {
+      res.writeHead(400)
+      res.end(JSON.stringify({ error: 'Missing session parameter' }))
+      return
+    }
+    const state = uiStateCache.get(sessionId) ?? null
+    res.writeHead(200)
+    res.end(JSON.stringify({ state }))
+    return
+  }
+
+  // POST /mcp/ui-state
+  if (req.method === 'POST' && pathname === '/mcp/ui-state') {
+    const { sessionId, state } = (body as Record<string, unknown> || {})
+    if (!sessionId) {
+      res.writeHead(400)
+      res.end(JSON.stringify({ error: 'Missing sessionId' }))
+      return
+    }
+    uiStateCache.set(sessionId as string, state)
+    broadcastMcpEvent('mcp-ui-state-updated', { sessionId, state })
+    res.writeHead(200)
+    res.end(JSON.stringify({ ok: true }))
+    return
+  }
+
+  // POST /mcp/acknowledge
+  if (req.method === 'POST' && pathname === '/mcp/acknowledge') {
+    const { sessionId, commandId } = (body as Record<string, unknown> || {})
+    if (!sessionId || !commandId) {
+      res.writeHead(400)
+      res.end(JSON.stringify({ error: 'Missing sessionId or commandId' }))
+      return
+    }
+    const queue = commandQueues.get(sessionId as string) || []
+    const command = queue.find(c => c.id === commandId)
+    if (!command) {
+      res.writeHead(404)
+      res.end(JSON.stringify({ error: 'Command not found' }))
+      return
+    }
+    command.status = 'acknowledged'
+    broadcastMcpEvent('mcp-command-acknowledged', { sessionId, commandId })
+    res.writeHead(200)
+    res.end(JSON.stringify({ ok: true }))
+    return
+  }
+
+  res.writeHead(404)
+  res.end(JSON.stringify({ error: 'Not found' }))
+}
+
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 export interface Relay {

@@ -4,8 +4,44 @@
  * that includes CORS headers for cross-origin dev mode (Next.js on :3000).
  */
 import * as http from 'http'
+import { execFile } from 'child_process'
 import { createRelay, handleMcpRequest } from './relay'
 import { DEFAULT_RELAY_PORT, DEV_WEB_ORIGIN } from '../extension/src/constants'
+
+// ─── Claude CLI wrapper ─────────────────────────────────────────────────────
+
+const CLAUDE_PATH = process.env.CLAUDE_PATH || '/Users/jaeseok/.local/bin/claude'
+
+function handleCliSend(req: http.IncomingMessage, res: http.ServerResponse, body: any) {
+  const { sessionId, message, cwd } = body as { sessionId?: string; message?: string; cwd?: string }
+
+  if (!message) {
+    res.writeHead(400, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ error: 'message is required' }))
+    return
+  }
+
+  const args = ['-p', message]
+  if (sessionId) args.unshift('-r', sessionId)
+
+  console.log(`[cli] Sending to session ${sessionId || 'new'}: ${message.slice(0, 50)}...`)
+
+  const child = execFile(CLAUDE_PATH, args, {
+    cwd: cwd || process.env.HOME,
+    timeout: 300000, // 5분 타임아웃
+    maxBuffer: 10 * 1024 * 1024, // 10MB
+  }, (error, stdout, stderr) => {
+    if (error) {
+      console.log(`[cli] Error: ${error.message}`)
+      res.writeHead(500, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: error.message, stderr }))
+      return
+    }
+    console.log(`[cli] Response received (${stdout.length} chars)`)
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ response: stdout, sessionId }))
+  })
+}
 
 function parseBody(req: http.IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
@@ -30,9 +66,10 @@ async function main() {
 
   const server = http.createServer((req, res) => {
     const isMcp = req.url?.startsWith('/mcp/')
+    const isCli = req.url?.startsWith('/cli/')
 
     res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*')
-    res.setHeader('Access-Control-Allow-Methods', isMcp ? 'GET, POST, OPTIONS' : 'GET, OPTIONS')
+    res.setHeader('Access-Control-Allow-Methods', (isMcp || isCli) ? 'GET, POST, OPTIONS' : 'GET, OPTIONS')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
     if (req.method === 'OPTIONS') {
@@ -43,6 +80,17 @@ async function main() {
 
     if (req.url === '/events') {
       return relay.handleSSE(req, res)
+    }
+
+    // Claude CLI 래핑 엔드포인트
+    if (req.url === '/cli/send' && req.method === 'POST') {
+      parseBody(req).then(body => {
+        handleCliSend(req, res, body)
+      }).catch(() => {
+        res.writeHead(400, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ error: 'Invalid JSON body' }))
+      })
+      return
     }
 
     if (isMcp) {

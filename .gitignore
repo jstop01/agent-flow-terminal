@@ -27,3 +27,5 @@ extension/.vscode/
 extension/package-lock.json
 
 .DS_Store
+desktop/resources/
+scripts/.mcp-server.js*

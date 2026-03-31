@@ -179,6 +179,8 @@ export function CommandPanel({
   mcpConnected,
 }: CommandPanelProps) {
   const [inputText, setInputText] = useState('')
+  const [newSessionText, setNewSessionText] = useState('')
+  const [showNewSessionInput, setShowNewSessionInput] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [localCommands, setLocalCommands] = useState<McpCommand[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -232,11 +234,72 @@ export function CommandPanel({
     }
   }
 
+  async function handleNewSession(message: string) {
+    setIsSending(true)
+    const cmdId = `cli-new-${Date.now()}`
+    setLocalCommands(prev => [...prev, {
+      id: cmdId,
+      type: 'prompt',
+      payload: { text: `[새 세션] ${message}` },
+      timestamp: Date.now(),
+      status: 'pending',
+    }])
+    try {
+      const res = await fetch('http://127.0.0.1:3001/cli/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }), // sessionId 없으면 새 세션
+      })
+      const data = await res.json()
+      setLocalCommands(prev => prev.map(c =>
+        c.id === cmdId ? { ...c, status: 'acknowledged' as const, payload: { ...c.payload, response: data.response } } : c
+      ))
+    } catch (err) {
+      setLocalCommands(prev => prev.map(c =>
+        c.id === cmdId ? { ...c, status: 'acknowledged' as const, payload: { ...c.payload, error: String(err) } } : c
+      ))
+    } finally {
+      setIsSending(false)
+    }
+  }
+
   async function handleSendPrompt() {
     const text = inputText.trim()
     if (!text || isSending) return
-    await sendCommand('prompt', { text })
     setInputText('')
+    setIsSending(true)
+
+    // 로컬 기록에 즉시 추가
+    const cmdId = `cli-${Date.now()}`
+    setLocalCommands(prev => [...prev, {
+      id: cmdId,
+      type: 'prompt',
+      payload: { text },
+      timestamp: Date.now(),
+      status: 'pending',
+    }])
+
+    try {
+      // Claude CLI로 직접 전송
+      const res = await fetch('http://127.0.0.1:3001/cli/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: selectedSessionId, message: text }),
+      })
+      const data = await res.json()
+
+      // 응답 받으면 상태 업데이트
+      setLocalCommands(prev => prev.map(c =>
+        c.id === cmdId ? { ...c, status: 'acknowledged' as const, payload: { ...c.payload, response: data.response } } : c
+      ))
+    } catch (err) {
+      console.error('[CommandPanel] CLI send error:', err)
+      setLocalCommands(prev => prev.map(c =>
+        c.id === cmdId ? { ...c, status: 'acknowledged' as const, payload: { ...c.payload, error: String(err) } } : c
+      ))
+    } finally {
+      setIsSending(false)
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -248,7 +311,7 @@ export function CommandPanel({
     e.stopPropagation()
   }
 
-  const canAct = mcpConnected && !!selectedSessionId && !isSending
+  const canAct = !!selectedSessionId && !isSending
 
   return (
     <SlidingPanel
@@ -313,7 +376,12 @@ export function CommandPanel({
           <p className="text-[9px] font-mono mb-1.5" style={{ color: COLORS.panelLabel }}>
             빠른 명령
           </p>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-wrap">
+            <QuickActionButton
+              label={showNewSessionInput ? '✕ 취소' : '➕ 새 세션'}
+              onClick={() => setShowNewSessionInput(prev => !prev)}
+              disabled={isSending}
+            />
             <QuickActionButton
               label="⏸ 일시정지"
               onClick={() => void sendCommand('pause')}
@@ -329,12 +397,53 @@ export function CommandPanel({
               onClick={() => void sendCommand('cancel')}
               disabled={!canAct}
             />
-            <QuickActionButton
-              label="📋 컨텍스트"
-              onClick={() => void sendCommand('set_context')}
-              disabled={!canAct}
-            />
           </div>
+
+          {/* 새 세션 인라인 입력 */}
+          {showNewSessionInput && (
+            <div className="flex gap-1.5 mt-1.5">
+              <input
+                type="text"
+                value={newSessionText}
+                onChange={e => setNewSessionText(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && newSessionText.trim()) {
+                    e.preventDefault()
+                    void handleNewSession(newSessionText.trim())
+                    setNewSessionText('')
+                    setShowNewSessionInput(false)
+                  }
+                  if (e.key === 'Escape') setShowNewSessionInput(false)
+                  e.stopPropagation()
+                }}
+                placeholder="새 세션 첫 메시지..."
+                autoFocus
+                className="flex-1 px-2 py-1 rounded text-[10px] font-mono outline-none"
+                style={{
+                  background: COLORS.holoBg05,
+                  border: `1px solid ${COLORS.holoBorder12}`,
+                  color: COLORS.textPrimary,
+                }}
+              />
+              <button
+                onClick={() => {
+                  if (newSessionText.trim()) {
+                    void handleNewSession(newSessionText.trim())
+                    setNewSessionText('')
+                    setShowNewSessionInput(false)
+                  }
+                }}
+                className="px-2 py-1 rounded text-[10px] font-mono"
+                style={{
+                  background: COLORS.complete + '30',
+                  border: `1px solid ${COLORS.complete}50`,
+                  color: COLORS.complete,
+                }}
+              >
+                시작
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Command Input ───────────────────────────────────────────────────── */}
@@ -352,7 +461,7 @@ export function CommandPanel({
               value={inputText}
               onChange={e => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="세션에 명령을 입력하세요..."
+              placeholder={selectedSessionId ? "세션에 명령을 입력하세요..." : "새 세션 버튼을 눌러 시작하세요"}
               disabled={!canAct}
               className="flex-1 px-2 py-1.5 rounded text-[10px] font-mono outline-none"
               style={{

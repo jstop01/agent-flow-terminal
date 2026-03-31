@@ -70,11 +70,23 @@ function broadcastEvent(event: AgentEvent) {
   broadcast(JSON.stringify({ type: 'agent-event', event }))
 }
 
+function getSessionCwd(sessionId: string): string | undefined {
+  const session = sessions.get(sessionId)
+  if (!session) return undefined
+  // Extract cwd from the JSONL file path
+  // Path format: ~/.claude/projects/-Users-foo-myproject/sessionId.jsonl
+  const dirName = path.basename(path.dirname(session.filePath))
+  // Convert encoded path back: -Users-foo-myproject -> /Users/foo/myproject
+  const decoded = dirName.replace(/^-/, '/').replace(/-/g, '/')
+  return decoded || undefined
+}
+
 function broadcastSessionLifecycle(type: 'started' | 'ended' | 'updated', sessionId: string, label: string) {
   if (type === 'started') {
+    const cwd = getSessionCwd(sessionId)
     broadcast(JSON.stringify({
       type: 'session-started',
-      session: { id: sessionId, label, status: 'active', startTime: Date.now(), lastActivityTime: Date.now() } as SessionInfo,
+      session: { id: sessionId, label, cwd, status: 'active', startTime: Date.now(), lastActivityTime: Date.now() } as SessionInfo,
     }))
   } else if (type === 'ended') {
     broadcast(JSON.stringify({ type: 'session-ended', sessionId }))
@@ -386,6 +398,7 @@ export async function createRelay(options: RelayOptions): Promise<Relay> {
         if (!session.sessionDetected) continue
         sessionList.push({
           id: session.sessionId, label: session.label,
+          cwd: getSessionCwd(session.sessionId),
           status: session.sessionCompleted ? 'completed' : 'active',
           startTime: session.sessionStartTime, lastActivityTime: session.lastActivityTime,
         })

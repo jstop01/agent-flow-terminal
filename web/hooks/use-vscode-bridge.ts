@@ -4,6 +4,19 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { vscodeBridge, type ConnectionStatus, type AgentEvent, type SessionInfo } from '@/lib/vscode-bridge'
 import { SimulationEvent } from '@/lib/agent-types'
 
+// ─── localStorage helpers for custom tab names ────────────────────────────
+const CUSTOM_NAMES_KEY = 'agent-flow-custom-names'
+
+function loadCustomNames(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_NAMES_KEY) || '{}')
+  } catch { return {} }
+}
+
+function saveCustomNames(names: Record<string, string>) {
+  localStorage.setItem(CUSTOM_NAMES_KEY, JSON.stringify(names))
+}
+
 interface BridgeHookResult {
   isVSCode: boolean
   connectionStatus: ConnectionStatus
@@ -31,6 +44,8 @@ interface BridgeHookResult {
   sessionsWithActivity: Set<string>
   /** Remove a session from the list */
   removeSession: (sessionId: string) => void
+  /** Rename a session tab */
+  renameSession: (sessionId: string, name: string) => void
 }
 
 /**
@@ -180,6 +195,11 @@ export function useVSCodeBridge(): BridgeHookResult {
       }
       if (type === 'list') {
         const sessionList = data as SessionInfo[]
+        // Restore custom names from localStorage
+        const customNames = loadCustomNames()
+        for (const s of sessionList) {
+          if (customNames[s.id]) s.customName = customNames[s.id]
+        }
         setSessions(sessionList)
         // Auto-select: prefer active sessions, then most recently active.
         // Only set selection — useLayoutEffect handles flushing events.
@@ -198,6 +218,9 @@ export function useVSCodeBridge(): BridgeHookResult {
         }
       } else if (type === 'started') {
         const session = data as SessionInfo
+        // Restore custom name from localStorage
+        const customNames = loadCustomNames()
+        if (customNames[session.id]) session.customName = customNames[session.id]
         setSessions(prev => {
           const existing = prev.find(s => s.id === session.id)
           if (existing) {
@@ -291,6 +314,17 @@ export function useVSCodeBridge(): BridgeHookResult {
     })
   }, [])
 
+  const renameSession = useCallback((sessionId: string, name: string) => {
+    // Save to localStorage
+    const names = loadCustomNames()
+    names[sessionId] = name
+    saveCustomNames(names)
+    // Update session state
+    setSessions(prev => prev.map(s =>
+      s.id === sessionId ? { ...s, customName: name } : s
+    ))
+  }, [])
+
   const bridgeOpenFile = useCallback((filePath: string, line?: number) => {
     vscodeBridge?.openFile(filePath, line)
   }, [])
@@ -310,5 +344,6 @@ export function useVSCodeBridge(): BridgeHookResult {
     getSessionEventCount,
     sessionsWithActivity,
     removeSession,
+    renameSession,
   }
 }

@@ -83,6 +83,7 @@ export interface TopBarProps {
   sessionsWithActivity: Set<string>
   onSelectSession: (id: string) => void
   onCloseSession: (id: string) => void
+  onRenameSession?: (id: string, name: string) => void
   // Connection
   isVSCode: boolean
   connectionStatus: ConnectionStatus
@@ -102,14 +103,14 @@ export interface TopBarProps {
 
 export const TopBar = memo(function TopBar({
   sessions, selectedSessionId, sessionsWithActivity,
-  onSelectSession, onCloseSession,
+  onSelectSession, onCloseSession, onRenameSession,
   isVSCode, connectionStatus,
   agentCount, totalTokens,
   showFileAttention, showTranscript, showCostOverlay, showTimeline, isMuted,
   onTogglePanel, onToggleTimeline, onToggleMute,
 }: TopBarProps) {
   return (
-    <div className="absolute top-3 left-3 right-3 flex items-center gap-4 font-mono text-[10px]" style={{ zIndex: Z.info }}>
+    <div className="absolute top-3 left-3 right-3 flex items-center gap-4 font-mono text-[12px]" style={{ zIndex: Z.info }}>
       {/* Session tabs — scrollable, takes available space */}
       {sessions.length > 1 && (
         <div className="min-w-0 flex-shrink overflow-x-auto scrollbar-hide">
@@ -119,6 +120,7 @@ export const TopBar = memo(function TopBar({
             sessionsWithActivity={sessionsWithActivity}
             onSelectSession={onSelectSession}
             onCloseSession={onCloseSession}
+            onRenameSession={onRenameSession}
           />
         </div>
       )}

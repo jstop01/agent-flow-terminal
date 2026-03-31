@@ -16,6 +16,10 @@ export interface AgentEvent {
 export interface SessionInfo {
   id: string
   label: string
+  /** User-assigned custom name (persisted in localStorage) */
+  customName?: string
+  /** Working directory of the session */
+  cwd?: string
   status: 'active' | 'completed'
   startTime: number
   lastActivityTime: number

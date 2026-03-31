@@ -395,6 +395,7 @@ export function AgentVisualizer() {
         sessionsWithActivity={bridge.sessionsWithActivity}
         onSelectSession={bridge.selectSession}
         onCloseSession={handleCloseSession}
+        onRenameSession={bridge.renameSession}
         isVSCode={bridge.isVSCode}
         connectionStatus={bridge.connectionStatus}
         agentCount={agents.size}

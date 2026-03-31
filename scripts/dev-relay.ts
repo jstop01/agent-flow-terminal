@@ -8,7 +8,7 @@ import { createRelay } from './relay'
 import { DEFAULT_RELAY_PORT, DEV_WEB_ORIGIN } from '../extension/src/constants'
 
 async function main() {
-  const workspace = process.argv[2] || process.cwd()
+  const workspace = process.argv[2] || require('os').homedir()
 
   console.log('Starting Agent Flow dev relay...\n')
   console.log(`Workspace: ${workspace}`)

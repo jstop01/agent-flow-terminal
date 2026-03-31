@@ -21,6 +21,7 @@ interface ToolDetailPopupProps {
 
 export function ToolDetailPopup({ tool, position, onClose }: ToolDetailPopupProps) {
   const stateColor = tool.state === 'running' ? COLORS.tool_calling : COLORS.complete
+  const stateLabel = tool.state === 'running' ? '실행 중' : tool.state === 'complete' ? '완료' : '오류'
 
   return (
     <DetailPopup position={position} width={POPUP.tool.width} estimatedHeight={POPUP.tool.estimatedHeight} onClose={onClose}>
@@ -32,7 +33,7 @@ export function ToolDetailPopup({ tool, position, onClose }: ToolDetailPopupProp
           {tool.toolName}
         </span>
         <span className="text-[9px] font-mono capitalize" style={{ color: stateColor + '90' }}>
-          {tool.state}
+          {stateLabel}
         </span>
       </PanelHeader>
 
@@ -60,7 +61,7 @@ export function ToolDetailPopup({ tool, position, onClose }: ToolDetailPopupProp
             color: COLORS.complete + '90',
           }}
         >
-          <span className="opacity-50 mr-1">Result:</span>
+          <span className="opacity-50 mr-1">결과:</span>
           {tool.result}
         </div>
       )}
@@ -68,7 +69,7 @@ export function ToolDetailPopup({ tool, position, onClose }: ToolDetailPopupProp
       {/* Token cost */}
       {tool.tokenCost != null && tool.tokenCost > 0 && (
         <div className="mt-1.5 text-[9px] font-mono" style={{ color: COLORS.textMuted }}>
-          {tool.tokenCost} tokens
+          {tool.tokenCost} 토큰
         </div>
       )}
     </DetailPopup>

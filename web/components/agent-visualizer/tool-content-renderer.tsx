@@ -185,7 +185,7 @@ function ReadContent({ data }: { data: Record<string, unknown> }) {
       <FilePath path={filePath} />
       {(offset != null || limit != null) && (
         <div className="text-[9px] opacity-50" style={{ color: COLORS.assistantText }}>
-          {offset ? `from line ${offset}` : ''}{offset && limit ? ', ' : ''}{limit ? `${limit} lines` : ''}
+          {offset ? `${offset}번째 줄부터` : ''}{offset && limit ? ', ' : ''}{limit ? `${limit}줄` : ''}
         </div>
       )}
     </div>
@@ -200,7 +200,7 @@ function GrepContent({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="text-[9px] font-mono">
       <span style={{ color: COLORS.tool_calling }}>{pattern}</span>
-      {searchPath && <span className="opacity-55 ml-1">in {truncatePath(searchPath, 2)}</span>}
+      {searchPath && <span className="opacity-55 ml-1">위치: {truncatePath(searchPath, 2)}</span>}
       {glob && <span className="opacity-55 ml-1">({glob})</span>}
     </div>
   )
@@ -213,7 +213,7 @@ function GlobContent({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="text-[9px] font-mono">
       <span style={{ color: COLORS.tool_calling }}>{pattern}</span>
-      {searchPath && <span className="opacity-55 ml-1">in {truncatePath(searchPath, 2)}</span>}
+      {searchPath && <span className="opacity-55 ml-1">위치: {truncatePath(searchPath, 2)}</span>}
     </div>
   )
 }

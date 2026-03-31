@@ -122,7 +122,7 @@ function LiveControlBar({
             }}
           />
           <span className="text-[10px] font-mono font-semibold tracking-wider" style={{ color: COLORS.liveText }}>
-            LIVE
+            실시간
           </span>
         </div>
 
@@ -156,7 +156,7 @@ function LiveControlBar({
             color: COLORS.textPrimary,
           }}
         >
-          ⏸ Review
+          ⏸ 리뷰
         </button>
       </div>
     </div>
@@ -299,7 +299,7 @@ function ReviewControlBar({
               color: COLORS.liveText,
             }}
           >
-            ▶ LIVE
+            ▶ 실시간
           </button>
         )}
 

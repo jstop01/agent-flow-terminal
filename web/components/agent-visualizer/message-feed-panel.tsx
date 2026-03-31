@@ -221,7 +221,7 @@ export function MessageFeedPanel({
         {/* Header */}
         <div className="flex items-center justify-between px-3 pt-2 pb-1">
           <span className="text-[10px] font-mono font-semibold tracking-wider" style={{ color: COLORS.textPrimary }}>
-            MESSAGES
+            메시지
           </span>
           <button
             onClick={() => setExpanded(false)}
@@ -236,7 +236,7 @@ export function MessageFeedPanel({
         {agentsWithMessages.length > 1 && (
         <div className="flex gap-0.5 px-2 pb-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           <TabButton
-            label="All"
+            label="전체"
             active={activeTab === 'all'}
             onClick={() => setActiveTab('all')}
             color={COLORS.holoBase}
@@ -269,7 +269,7 @@ export function MessageFeedPanel({
           {messages.length === 0 ? (
             <div className="flex items-center justify-center py-6">
               <span className="text-[9px] font-mono" style={{ color: COLORS.textMuted }}>
-                No messages yet
+                아직 메시지가 없습니다
               </span>
             </div>
           ) : (
@@ -381,7 +381,7 @@ function MessageRow({ message, agentId, agentName, showAgent, isSelected, onClic
           style={{ color: COLORS.textMuted }}
           onClick={(e) => { e.stopPropagation(); setExpanded(prev => !prev) }}
         >
-          {expanded ? '▴ less' : '▾ more'}
+          {expanded ? '▴ 접기' : '▾ 더보기'}
         </button>
       )}
     </div>

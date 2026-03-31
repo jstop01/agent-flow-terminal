@@ -70,10 +70,10 @@ export const ANIM_SPEED = {
   agentFadeIn: 3,
   /** Agent scale-in (scale per dt) */
   agentScaleIn: 4,
-  /** Agent fade-out after complete (opacity per dt) */
-  agentFadeOut: 0.4,
+  /** Agent fade-out after complete (opacity per dt) — fast disappear */
+  agentFadeOut: 3,
   /** Agent scale-out after complete (scale per dt) */
-  agentScaleOut: 0.05,
+  agentScaleOut: 0.5,
   /** Tool fade-in (opacity per dt) */
   toolFadeIn: 4,
   /** Tool fade-out after complete/visible (opacity per dt) */

@@ -3,8 +3,8 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'LLM Agent Visualizer',
-  description: 'Real-time visualization of LLM agent execution flows - VS Code extension concept',
+  title: 'LLM 에이전트 시각화',
+  description: 'LLM 에이전트 실행 흐름 실시간 시각화',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -31,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="ko" className="dark" suppressHydrationWarning>
       <body className="font-sans antialiased bg-[#0a0a1a]">
         {children}
         <Analytics />

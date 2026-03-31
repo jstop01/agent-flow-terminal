@@ -60,8 +60,8 @@ function ToggleButton({ active, onClick, children, style, activeColor }: {
 function ConnectionIndicator({ status }: { status: ConnectionStatus }) {
   const color = status === 'watching' ? COLORS.complete
     : status === 'connected' ? COLORS.idle : COLORS.error
-  const label = status === 'watching' ? 'LIVE'
-    : status === 'connected' ? 'CONNECTED' : 'OFFLINE'
+  const label = status === 'watching' ? '실시간'
+    : status === 'connected' ? '연결됨' : '오프라인'
 
   return (
     <span className="flex items-center gap-1.5">
@@ -99,6 +99,8 @@ export interface TopBarProps {
   onTogglePanel: (panel: 'files' | 'transcript' | 'cost') => void
   onToggleTimeline: () => void
   onToggleMute: () => void
+  showSettings?: boolean
+  onToggleSettings?: () => void
 }
 
 export const TopBar = memo(function TopBar({
@@ -108,6 +110,7 @@ export const TopBar = memo(function TopBar({
   agentCount, totalTokens,
   showFileAttention, showTranscript, showCostOverlay, showTimeline, isMuted,
   onTogglePanel, onToggleTimeline, onToggleMute,
+  showSettings, onToggleSettings,
 }: TopBarProps) {
   return (
     <div className="absolute top-3 left-3 right-3 flex items-center gap-4 font-mono text-[12px]" style={{ zIndex: Z.info }}>
@@ -131,9 +134,9 @@ export const TopBar = memo(function TopBar({
       {/* Right-side info/controls */}
       <div className="flex items-center gap-4 flex-shrink-0" style={{ color: COLORS.textMuted }}>
         {isVSCode && <ConnectionIndicator status={connectionStatus} />}
-        <span>{agentCount} agents</span>
+        <span>{agentCount}개 에이전트</span>
         <span>
-          {formatTokens(totalTokens)} tokens
+          {formatTokens(totalTokens)} 토큰
           <span style={{ color: COLORS.complete + '65', marginLeft: 4 }}>
             ~${agentCost(totalTokens).toFixed(2)}
           </span>
@@ -144,23 +147,28 @@ export const TopBar = memo(function TopBar({
           background: COLORS.holoBg03,
           border: `1px solid ${COLORS.holoBorder06}`,
         }}>
-          <ToggleButton active={showFileAttention} onClick={() => onTogglePanel('files')} style={{ background: showFileAttention ? undefined : 'transparent', border: 'none' }}>Files</ToggleButton>
-          <ToggleButton active={showTranscript} onClick={() => onTogglePanel('transcript')} style={{ background: showTranscript ? undefined : 'transparent', border: 'none' }}>Chat</ToggleButton>
+          <ToggleButton active={showFileAttention} onClick={() => onTogglePanel('files')} style={{ background: showFileAttention ? undefined : 'transparent', border: 'none' }}>파일</ToggleButton>
+          <ToggleButton active={showTranscript} onClick={() => onTogglePanel('transcript')} style={{ background: showTranscript ? undefined : 'transparent', border: 'none' }}>채팅</ToggleButton>
           <ToggleButton
             active={showCostOverlay}
             onClick={() => onTogglePanel('cost')}
             activeColor={{ bg: COLORS.costActiveBg, text: COLORS.complete }}
             style={{ background: showCostOverlay ? undefined : 'transparent', border: 'none' }}
           >
-            $Cost
+            $비용
           </ToggleButton>
         </div>
 
         {/* Independent toggles */}
-        <ToggleButton active={showTimeline} onClick={onToggleTimeline}>Timeline</ToggleButton>
+        <ToggleButton active={showTimeline} onClick={onToggleTimeline}>타임라인</ToggleButton>
         <ToggleButton active={!isMuted} onClick={onToggleMute} style={{ border: `1px solid ${COLORS.toggleBorder}` }}>
           {isMuted ? <MutedIcon /> : <UnmutedIcon />}
         </ToggleButton>
+        {onToggleSettings && (
+          <ToggleButton active={!!showSettings} onClick={onToggleSettings} style={{ border: `1px solid ${COLORS.toggleBorder}` }}>
+            ⚙
+          </ToggleButton>
+        )}
       </div>
     </div>
   )

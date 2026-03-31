@@ -50,24 +50,29 @@ export function drawBackground(
   ctx.fillStyle = COLORS.void
   ctx.fillRect(0, 0, width, height)
 
-  // Ambient spotlight following active agent
+  // ─── 항상 표시: 스포트라이트 + 파티클 + 비네팅 ───
+
+  // 활성 에이전트 주변 스포트라이트
   if (activeAgentPos) {
     const screenX = activeAgentPos.x * transform.scale + transform.x
     const screenY = activeAgentPos.y * transform.scale + transform.y
-    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, 300)
-    gradient.addColorStop(0, activeAgentPos.color + '08')
+    const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, 400)
+    gradient.addColorStop(0, activeAgentPos.color + '0c')
+    gradient.addColorStop(0.5, activeAgentPos.color + '04')
     gradient.addColorStop(1, 'transparent')
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, width, height)
   }
 
-  // Depth particles (parallax)
+  // 떠다니는 별 파티클 (parallax)
   for (const p of particles) {
     const parallaxFactor = 0.3 + p.depth * 0.7
     const px = p.x + transform.x * parallaxFactor * 0.1
     const py = p.y + transform.y * parallaxFactor * 0.1
     const size = p.size * (0.5 + p.depth * 0.5)
-    const alpha = p.brightness * (0.5 + p.depth * 0.5)
+    // 부드러운 깜빡임 효과
+    const twinkle = 0.6 + 0.4 * Math.sin(time * (1.5 + p.depth * 2) + p.x * 0.01)
+    const alpha = p.brightness * (0.4 + p.depth * 0.4) * twinkle
 
     ctx.beginPath()
     ctx.fillStyle = COLORS.holoBase + alphaHex(alpha)
@@ -75,7 +80,18 @@ export function drawBackground(
     ctx.fill()
   }
 
-  // Hex grid (optional)
+  // 비네팅 효과 (가장자리 어두워짐)
+  const cx = width / 2
+  const cy = height / 2
+  const maxR = Math.sqrt(cx * cx + cy * cy)
+  const vignette = ctx.createRadialGradient(cx, cy, maxR * 0.4, cx, cy, maxR)
+  vignette.addColorStop(0, 'transparent')
+  vignette.addColorStop(0.7, 'rgba(0, 0, 5, 0.15)')
+  vignette.addColorStop(1, 'rgba(0, 0, 5, 0.5)')
+  ctx.fillStyle = vignette
+  ctx.fillRect(0, 0, width, height)
+
+  // 헥스 그리드 (설정에서 켜졌을 때만)
   if (showHexGrid) {
     drawHexGrid(ctx, width, height, transform, time)
   }

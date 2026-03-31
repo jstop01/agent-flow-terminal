@@ -24,6 +24,7 @@ import { MOCK_DURATION } from "@/lib/mock-scenario"
 import { MessageFeedPanel } from "./message-feed-panel"
 import { TopBar } from "./top-bar"
 import { useAudioEffects } from "@/hooks/use-audio-effects"
+import { SettingsPanel } from "./settings-panel"
 
 export function AgentVisualizer() {
   const bridge = useVSCodeBridge()
@@ -63,11 +64,12 @@ export function AgentVisualizer() {
   const selection = useSelectionState({ agents, toolCalls, discoveries })
 
   const [showStats, setShowStats] = useState(false)
-  const [showHexGrid, setShowHexGrid] = useState(true)
+  const [showHexGrid, setShowHexGrid] = useState(false)
   const [showCostOverlay, setShowCostOverlay] = useState(false)
   const [showTimeline, setShowTimeline] = useState(false)
   const [showFileAttention, setShowFileAttention] = useState(false)
   const [showTranscript, setShowTranscript] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
   // Mutually exclusive panel toggling — opening one closes the others
   const toggleExclusivePanel = useCallback((panel: 'files' | 'transcript' | 'cost') => {
@@ -220,13 +222,13 @@ export function AgentVisualizer() {
   // Context menu items
   const contextMenuItems = selection.contextMenu ? (
     selection.contextMenu.agentId ? [
-      { label: '📊  Toggle Stats', onClick: () => setShowStats(prev => !prev) },
+      { label: '📊  통계 토글', onClick: () => setShowStats(prev => !prev) },
     ] : [
-      { label: '🔍  Zoom to Fit', onClick: () => setZoomToFitTrigger(n => n + 1) },
-      { label: '📊  Toggle Stats', onClick: () => setShowStats(prev => !prev) },
-      { label: '⬡  Toggle Grid', onClick: () => setShowHexGrid(prev => !prev) },
+      { label: '🔍  화면 맞춤', onClick: () => setZoomToFitTrigger(n => n + 1) },
+      { label: '📊  통계 토글', onClick: () => setShowStats(prev => !prev) },
+      { label: '⬡  그리드 토글', onClick: () => setShowHexGrid(prev => !prev) },
       { label: '', onClick: () => {}, separator: true },
-      { label: '⟲  Restart', onClick: restart },
+      { label: '⟲  다시 시작', onClick: restart },
     ]
   ) : []
 
@@ -254,8 +256,8 @@ export function AgentVisualizer() {
       {isEmpty && (
         <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
           <div className="text-center" style={{ fontFamily: "'SF Mono', 'Fira Code', monospace" }}>
-            <div className="text-sm" style={{ color: '#66ccff80' }}>WAITING FOR AGENT SESSION</div>
-            <div className="mt-2 text-xs" style={{ color: '#66ccff40' }}>Start a Claude Code session to see activity</div>
+            <div className="text-sm" style={{ color: '#66ccff80' }}>에이전트 세션 대기 중</div>
+            <div className="mt-2 text-xs" style={{ color: '#66ccff40' }}>Claude Code 세션을 시작하면 활동이 표시됩니다</div>
           </div>
         </div>
       )}
@@ -407,6 +409,28 @@ export function AgentVisualizer() {
         isMuted={isMuted}
         onTogglePanel={toggleExclusivePanel}
         onToggleTimeline={() => setShowTimeline(prev => !prev)}
+        onToggleMute={handleToggleMute}
+        showSettings={showSettings}
+        onToggleSettings={() => setShowSettings(prev => !prev)}
+      />
+
+      {/* Settings panel */}
+      <SettingsPanel
+        visible={showSettings}
+        onClose={() => setShowSettings(false)}
+        showHexGrid={showHexGrid}
+        onToggleHexGrid={() => setShowHexGrid(prev => !prev)}
+        showStats={showStats}
+        onToggleStats={() => setShowStats(prev => !prev)}
+        showTimeline={showTimeline}
+        onToggleTimeline={() => setShowTimeline(prev => !prev)}
+        showFileAttention={showFileAttention}
+        onToggleFileAttention={() => toggleExclusivePanel('files')}
+        showTranscript={showTranscript}
+        onToggleTranscript={() => toggleExclusivePanel('transcript')}
+        showCostOverlay={showCostOverlay}
+        onToggleCostOverlay={() => toggleExclusivePanel('cost')}
+        isMuted={isMuted}
         onToggleMute={handleToggleMute}
       />
     </div>

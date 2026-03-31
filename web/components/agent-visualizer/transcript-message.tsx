@@ -34,7 +34,7 @@ export function TranscriptMessage({ message, compact = false, searchQuery }: { m
             border: `1px solid ${COLORS.userMsgBorder}`,
           }}
         >
-          <div className="text-[9px] mb-1 font-semibold tracking-wider" style={{ color: COLORS.userLabel }}>USER</div>
+          <div className="text-[9px] mb-1 font-semibold tracking-wider" style={{ color: COLORS.userLabel }}>사용자</div>
           <div style={{ color: COLORS.userText }} className="whitespace-pre-wrap break-words">
             <HighlightText text={message.content} query={searchQuery} />
           </div>
@@ -50,7 +50,7 @@ export function TranscriptMessage({ message, compact = false, searchQuery }: { m
             border: `1px solid ${COLORS.holoBorder08}`,
           }}
         >
-          <div className="text-[9px] mb-1 font-semibold tracking-wider" style={{ color: COLORS.assistantLabel }}>CLAUDE</div>
+          <div className="text-[9px] mb-1 font-semibold tracking-wider" style={{ color: COLORS.assistantLabel }}>클로드</div>
           <div style={{ color: COLORS.assistantText }} className="whitespace-pre-wrap break-words">
             <HighlightText text={compact ? message.content.slice(0, 200) + (message.content.length > 200 ? '...' : '') : message.content} query={searchQuery} />
           </div>
@@ -68,7 +68,7 @@ export function TranscriptMessage({ message, compact = false, searchQuery }: { m
           onClick={() => setExpanded(!expanded)}
         >
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px] font-semibold tracking-wider" style={{ color: COLORS.thinkingLabel }}>THINKING</span>
+            <span className="text-[9px] font-semibold tracking-wider" style={{ color: COLORS.thinkingLabel }}>사고 중</span>
             <span className="text-[9px]" style={{ color: COLORS.thinkingArrow }}>{expanded ? '▾' : '▸'}</span>
             {!expanded && (
               <span className="text-[9px] font-mono truncate opacity-50" style={{ color: COLORS.thinkingPreview }}>
@@ -99,7 +99,7 @@ export function TranscriptMessage({ message, compact = false, searchQuery }: { m
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-[9px]" style={{ color: COLORS.userLabel }}>⚙</span>
             <span className="text-[9px] font-mono font-semibold" style={{ color: COLORS.tool_calling }}>
-              {message.toolName || 'Tool'}
+              {message.toolName || '도구'}
             </span>
           </div>
           {message.inputData ? (

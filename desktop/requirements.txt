@@ -1,0 +1,13 @@
+# Agent Flow Monitor — Python desktop overlay dependencies
+# Install with: pip3 install -r requirements.txt
+
+# Core GUI / webview
+pywebview>=4.4
+
+# macOS native bindings used by pywebview (auto-installed as deps,
+# listed here explicitly so the versions are pinned for reproducibility)
+pyobjc-core>=9.0
+pyobjc-framework-Cocoa>=9.0
+pyobjc-framework-WebKit>=9.0
+pyobjc-framework-Quartz>=9.0
+pyobjc-framework-security>=9.0

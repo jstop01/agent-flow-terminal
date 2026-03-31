@@ -311,6 +311,9 @@ export function drawAgents(
   time: number,
 ) {
   for (const [id, agent] of agents) {
+    // 완료되어 희미해진 에이전트는 렌더링 건너뛰기
+    if (agent.opacity < 0.15) continue
+
     const radius = agent.isMain ? NODE.radiusMain : NODE.radiusSub
     const color = getStateColor(agent.state)
     const isHovered = id === hoveredAgentId

@@ -85,19 +85,39 @@ export function useVSCodeBridge(): BridgeHookResult {
     if (bridge.isVSCode) return
 
     // Connect to relay in dev mode or standalone CLI mode
+    // Always connect in development mode — relay handles live session data
     const isStandalone = process.env.AGENT_FLOW_STANDALONE === '1'
-    if (!isStandalone && (process.env.NODE_ENV !== 'development' || process.env.NEXT_PUBLIC_DEMO !== '0')) return
+    const isDev = process.env.NODE_ENV === 'development'
+    if (!isStandalone && !isDev) return
 
-    const relayPort = process.env.NEXT_PUBLIC_RELAY_PORT || ''
-    const es = new EventSource(relayPort ? `http://127.0.0.1:${relayPort}/events` : '/events')
+    const relayPort = process.env.NEXT_PUBLIC_RELAY_PORT || '3001'
+    const es = new EventSource(`http://127.0.0.1:${relayPort}/events`)
 
     es.onopen = () => {
+      console.log('[agent-flow] SSE connected')
       setConnectionStatus('connected')
       setUseMockData(false)
     }
     es.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data)
+        console.log('[agent-flow] SSE message:', data.type, data.type === 'agent-event-batch' ? `(${data.events?.length} events)` : '')
+        // SSE delivers session-list and agent-event-batch in separate messages.
+        // Dispatch each one via postMessage so the bridge handles them in order.
+        if (data.type === 'agent-event-batch' && Array.isArray(data.events)) {
+          // If no session is selected yet, check if we have a session from a
+          // prior session-list message. The ref is updated synchronously by the
+          // session handler, so it should be available here.
+          // If still null, try to auto-select from the event's sessionId.
+          if (!selectedSessionIdRef.current && data.events.length > 0 && data.events[0].sessionId) {
+            const sid = data.events[0].sessionId
+            // Synthesize a session-started message so the bridge registers it
+            window.postMessage({
+              type: 'session-started',
+              session: { id: sid, label: sid.slice(0, 8), cwd: '', status: 'active', startTime: Date.now(), lastActivityTime: Date.now() },
+            }, '*')
+          }
+        }
         window.postMessage(data, '*')
       } catch {}
     }

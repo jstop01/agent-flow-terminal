@@ -80,10 +80,10 @@ export function SessionTranscriptPanel({
         >
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono tracking-widest font-semibold" style={{ color: COLORS.panelLabel }}>
-              TRANSCRIPT
+              대화 기록
             </span>
             <span className="text-[9px] font-mono" style={{ color: COLORS.panelLabelDim }}>
-              {searchQuery ? `${filteredConversation.length}/${conversation.length}` : conversation.length} messages
+              {searchQuery ? `${filteredConversation.length}/${conversation.length}` : conversation.length} 건
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -113,7 +113,7 @@ export function SessionTranscriptPanel({
                 if (e.key === 'Escape') { setShowSearch(false); setSearchQuery('') }
                 e.stopPropagation()
               }}
-              placeholder="Filter messages..."
+              placeholder="메시지 검색..."
               className="w-full px-2 py-1 rounded text-[10px] font-mono outline-none"
               style={{
                 background: COLORS.holoBg05,
@@ -134,7 +134,7 @@ export function SessionTranscriptPanel({
           {filteredConversation.length === 0 ? (
             <div className="flex items-center justify-center h-32">
               <p className="text-[10px] font-mono" style={{ color: COLORS.textMuted }}>
-                {searchQuery ? 'No matching messages' : 'Waiting for session activity...'}
+                {searchQuery ? '일치하는 메시지가 없습니다' : '세션 활동 대기 중...'}
               </p>
             </div>
           ) : (
@@ -166,7 +166,7 @@ export function SessionTranscriptPanel({
                 color: COLORS.scrollBtnText,
               }}
             >
-              ↓ New messages
+              ↓ 새 메시지
             </button>
           </div>
         )}

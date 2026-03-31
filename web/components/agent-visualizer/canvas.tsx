@@ -283,7 +283,8 @@ export function AgentCanvas({
       ctx.restore()
 
       if (showCostOverlay) drawCostSummaryPanel(ctx, agents, toolCalls)
-      if (bloomRef.current) bloomRef.current.apply(canvas, ctx)
+      // Bloom disabled — 흐릿한 그림자 효과 제거
+      // if (bloomRef.current) bloomRef.current.apply(canvas, ctx)
 
       // ─── Performance overlay (enabled via ?perf or ?stress) ──────────
       if (PERF_OVERLAY_ENABLED) {

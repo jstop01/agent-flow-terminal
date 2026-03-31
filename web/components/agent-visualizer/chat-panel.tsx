@@ -57,7 +57,7 @@ export function AgentChatPanel({
           {conversation.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-[10px] font-mono" style={{ color: COLORS.textMuted }}>
-                No messages yet...
+                아직 메시지가 없습니다...
               </p>
             </div>
           ) : (

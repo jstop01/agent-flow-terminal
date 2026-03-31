@@ -22,11 +22,11 @@ const FONT = '9px monospace'
 // ─── Legend (static DOM — no perf cost) ─────────────────────────────────────
 
 const LEGEND_ITEMS = [
-  { color: COLORS.idle, label: 'Idle' },
-  { color: COLORS.thinking, label: 'Thinking' },
-  { color: COLORS.tool, label: 'Tool Call' },
-  { color: COLORS.error, label: 'Error' },
-  { color: COLORS.complete, label: 'Complete' },
+  { color: COLORS.idle, label: '대기' },
+  { color: COLORS.thinking, label: '사고' },
+  { color: COLORS.tool, label: '도구 호출' },
+  { color: COLORS.error, label: '오류' },
+  { color: COLORS.complete, label: '완료' },
 ]
 
 // ─── Canvas-based timeline rendering ────────────────────────────────────────
@@ -47,7 +47,7 @@ function drawTimeline(
     ctx.font = FONT
     ctx.fillStyle = COLORS.textMuted
     ctx.textAlign = 'center'
-    ctx.fillText('No timeline data', width / 2, height / 2)
+    ctx.fillText('타임라인 데이터 없음', width / 2, height / 2)
     ctx.restore()
     return
   }
@@ -196,7 +196,7 @@ export function TimelinePanel({ visible, timelineEntries, currentTime, onClose }
       <div className="glass-card relative">
         <PanelHeader onClose={onClose}>
           <span className="text-[10px] font-mono tracking-wider" style={{ color: COLORS.textPrimary }}>
-            EXECUTION TIMELINE
+            실행 타임라인
           </span>
         </PanelHeader>
 

@@ -82,10 +82,10 @@ export const COLORS = {
   discoveryCode: '#ffbb44',
 
   // Session tab states
-  tabSelectedBg: 'rgba(100, 200, 255, 0.15)',
-  tabInactiveBg: 'rgba(100, 200, 255, 0.03)',
-  tabSelectedBorder: 'rgba(100, 200, 255, 0.3)',
-  tabInactiveBorder: 'rgba(100, 200, 255, 0.08)',
+  tabSelectedBg: 'rgba(100, 200, 255, 0.25)',
+  tabInactiveBg: 'rgba(100, 200, 255, 0.08)',
+  tabSelectedBorder: 'rgba(100, 200, 255, 0.5)',
+  tabInactiveBorder: 'rgba(100, 200, 255, 0.18)',
   tabClose: '#ff6688',
 
   // Role colors (message bubbles)
@@ -220,9 +220,9 @@ export const COLORS = {
 // ─── Role Colors (message feed & bubbles) ───────────────────────────────────
 
 export const ROLE_COLORS: Record<string, { bg: string; bgSelected: string; text: string; label: string }> = {
-  assistant: { bg: COLORS.roleAssistantBg, bgSelected: COLORS.roleAssistantBgSelected, text: COLORS.roleAssistantText, label: 'CLAUDE' },
-  thinking:  { bg: COLORS.roleThinkingBg,  bgSelected: COLORS.roleThinkingBgSelected,  text: COLORS.roleThinkingText,  label: 'THINKING' },
-  user:      { bg: COLORS.roleUserBg,       bgSelected: COLORS.roleUserBgSelected,       text: COLORS.roleUserText,       label: 'USER' },
+  assistant: { bg: COLORS.roleAssistantBg, bgSelected: COLORS.roleAssistantBgSelected, text: COLORS.roleAssistantText, label: '클로드' },
+  thinking:  { bg: COLORS.roleThinkingBg,  bgSelected: COLORS.roleThinkingBgSelected,  text: COLORS.roleThinkingText,  label: '사고 중' },
+  user:      { bg: COLORS.roleUserBg,       bgSelected: COLORS.roleUserBgSelected,       text: COLORS.roleUserText,       label: '사용자' },
 } as const
 
 // ─── Color Helper Functions ──────────────────────────────────────────────────

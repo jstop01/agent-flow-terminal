@@ -56,7 +56,7 @@ export function AgentDetailCard({
       {/* Context bar */}
       <div className="mb-3">
         <div className="flex justify-between mb-1">
-          <span className="text-[10px]" style={{ color: COLORS.textMuted }}>Context</span>
+          <span className="text-[10px]" style={{ color: COLORS.textMuted }}>컨텍스트</span>
           <span className="text-[10px] font-mono" style={{ color: COLORS.textDim }}>
             {formatTokens(agent.tokensUsed)} / {formatTokens(agent.tokensMax)} ({contextPercent}%)
           </span>
@@ -66,8 +66,8 @@ export function AgentDetailCard({
 
       {/* Stats row */}
       <div className="flex gap-3 mb-3 text-[10px] font-mono" style={{ color: COLORS.textDim }}>
-        <span>{agent.toolCalls} tools</span>
-        <span>{agent.timeAlive.toFixed(1)}s alive</span>
+        <span>{agent.toolCalls}개 도구</span>
+        <span>{agent.timeAlive.toFixed(1)}초 경과</span>
         <span className="capitalize" style={{ color: stateColor }}>{agent.state}</span>
       </div>
 

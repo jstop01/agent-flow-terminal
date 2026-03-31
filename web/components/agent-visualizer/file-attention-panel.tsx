@@ -30,7 +30,7 @@ export function FileAttentionPanel({ visible, fileAttention, onClose, onOpenFile
       <div className="glass-card relative">
         <PanelHeader onClose={onClose}>
           <span className="text-[10px] font-mono tracking-wider" style={{ color: COLORS.textPrimary }}>
-            FILE ATTENTION
+            파일 주목도
           </span>
         </PanelHeader>
 
@@ -38,7 +38,7 @@ export function FileAttentionPanel({ visible, fileAttention, onClose, onOpenFile
         <div className="space-y-1 max-h-[300px] overflow-y-auto">
           {files.length === 0 && (
             <div className="text-[9px] font-mono py-2 text-center" style={{ color: COLORS.textMuted }}>
-              No files accessed yet
+              아직 접근한 파일이 없습니다
             </div>
           )}
           {files.map((file) => {
@@ -79,19 +79,19 @@ export function FileAttentionPanel({ visible, fileAttention, onClose, onOpenFile
                 <div className="flex items-center gap-2 mt-1">
                   {file.reads > 0 && (
                     <span className="text-[9px] font-mono" style={{ color: COLORS.holoBase + '80' }}>
-                      {file.reads} read{file.reads > 1 ? 's' : ''}
+                      {file.reads}회 읽기
                     </span>
                   )}
                   {file.edits > 0 && (
                     <span className="text-[9px] font-mono" style={{ color: COLORS.tool + '80' }}>
-                      {file.edits} edit{file.edits > 1 ? 's' : ''}
+                      {file.edits}회 편집
                     </span>
                   )}
                   {file.agents.length > 0 && (
                     <span className="text-[9px] font-mono" style={{ color: COLORS.textMuted }}
                       title={file.agents.join(', ')}
                     >
-                      {file.agents.length} agent{file.agents.length > 1 ? 's' : ''}
+                      {file.agents.length}개 에이전트
                     </span>
                   )}
                 </div>
@@ -106,8 +106,8 @@ export function FileAttentionPanel({ visible, fileAttention, onClose, onOpenFile
             borderTop: `1px solid ${COLORS.holoBorder08}`,
             color: COLORS.textMuted,
           }}>
-            <span>{files.length} files</span>
-            <span>{formatTokens(files.reduce((s, f) => s + f.totalTokens, 0))} tokens in file reads</span>
+            <span>{files.length}개 파일</span>
+            <span>{formatTokens(files.reduce((s, f) => s + f.totalTokens, 0))} 토큰 (파일 읽기)</span>
           </div>
         )}
       </div>

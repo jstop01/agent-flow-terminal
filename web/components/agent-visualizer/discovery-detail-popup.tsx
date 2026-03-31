@@ -20,9 +20,9 @@ export function DiscoveryDetailPopup({ discovery, position, onClose }: Discovery
   const typeColor = getDiscoveryTypeColor(discovery.type)
 
   const typeLabel =
-    discovery.type === 'file' ? 'FILE' :
-    discovery.type === 'pattern' ? 'PATTERN' :
-    discovery.type === 'finding' ? 'FINDING' : 'CODE'
+    discovery.type === 'file' ? '파일' :
+    discovery.type === 'pattern' ? '패턴' :
+    discovery.type === 'finding' ? '발견' : '코드'
 
   return (
     <DetailPopup position={position} width={POPUP.discovery.width} estimatedHeight={POPUP.discovery.estimatedHeight} onClose={onClose}>
@@ -61,7 +61,7 @@ export function DiscoveryDetailPopup({ discovery, position, onClose }: Discovery
 
       {/* Agent attribution */}
       <div className="mt-1.5 text-[9px] font-mono" style={{ color: COLORS.textMuted }}>
-        agent: {discovery.agentId}
+        에이전트: {discovery.agentId}
       </div>
     </DetailPopup>
   )
